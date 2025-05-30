@@ -42,6 +42,11 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    // Google Maps & Permissions
+    implementation(libs.google.maps.services)
+    implementation(libs.google.maps.compose)
+    implementation(libs.accompanist.permissions)
+
     implementation(libs.androidx.ui.tooling)
     implementation(libs.navigation.compose)
     implementation(libs.hilt.navigation.compose)
