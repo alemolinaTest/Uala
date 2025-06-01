@@ -1,9 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -15,6 +14,12 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField(
+            "String",
+            "CITIES_URL",
+            "\"https://gist.githubusercontent.com/hernan-uala/dce8843a8edbe0b0018b32e137bc2b3a/raw/0996accf70cb0ca0e16f9a99e0ee185fafca7af1/cities.json\""
+        )
     }
 
     buildTypes {
@@ -38,25 +43,39 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("moshi.kotlin.codegen.generateKotlinJsonAdapter", "true")
+}
+
 dependencies {
+    // 💡 Module Dependencies
     implementation(project(":domain"))
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    // 💡 Dependency Injection (Koin)
+    implementation(libs.koin.android)
 
-    // Retrofit
+    // 💡 Networking (Retrofit & Serialization)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.retrofit.serialization)
+    implementation(libs.okhttp.logging)
 
-    // Room
+    // 💡 Database (Room)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // 💡 AndroidX Core & UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+
+    // 💡 Code Generation
+    implementation(libs.javapoet)
+
+    // 💡 Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

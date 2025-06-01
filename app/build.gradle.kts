@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
 }
 
 android {
@@ -44,17 +43,12 @@ android {
 }
 
 dependencies {
+    // 💡 Modules
     implementation(project(":presentation"))
     implementation(project(":domain"))
     implementation(project(":data"))
 
-    implementation(libs.androidx.ui.tooling)
-    implementation(libs.navigation.compose)
-
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
+    // 💡 Core Libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -63,11 +57,24 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.okhttp.logging)
+
+    // 💡 Navigation
+    implementation(libs.navigation.compose)
+
+    // 💡 Dependency Injection (Koin)
+    implementation(libs.koin.core)
+    implementation(libs.koin.androidx.compose)
+
+    // 💡 Testing Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // 💡 Debug Libraries
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 }

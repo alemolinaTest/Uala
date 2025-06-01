@@ -3,7 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt)
+    kotlin("kapt")
+
 }
 
 android {
@@ -38,9 +39,10 @@ android {
 dependencies {
     implementation(project(":domain"))
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    // Koin
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 
     // Google Maps & Permissions
     implementation(libs.google.maps.services)
@@ -49,7 +51,6 @@ dependencies {
 
     implementation(libs.androidx.ui.tooling)
     implementation(libs.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
