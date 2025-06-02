@@ -1,5 +1,6 @@
 package com.amolina.data.di
 
+import com.amolina.data.BuildConfig
 import com.amolina.data.remote.CitiesApiService
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -15,6 +16,6 @@ fun provideCitiesApiService(
     client: OkHttpClient,
     json: Json
 ): CitiesApiService {
-    val url = "https://gist.githubusercontent.com/hernan-uala/dce8843a8edbe0b0018b32e137bc2b3a/raw/0996accf70cb0ca0e16f9a99e0ee185fafca7af1/cities.json"
+    val url = BuildConfig.CITIES_URL
     return CitiesApiService(client, json, url)
 }

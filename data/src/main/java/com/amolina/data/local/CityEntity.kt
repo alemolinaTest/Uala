@@ -8,9 +8,14 @@ import com.amolina.domain.model.City
 data class CityEntity(
     @PrimaryKey val id: Int,
     val name: String,
-    val country: String,
+    val countryCode: String,
+    val latitude: Double,
+    val longitude: Double,
     val isFavourite: Boolean = false
 )
 
-fun CityEntity.toDomain(): City = City(id, name, country, isFavourite)
-fun City.toEntity() = CityEntity(id, name, country, isFavourite)
+fun CityEntity.toDomain(): City =
+    City(id, name, countryCode, latitude, longitude, isFavourite)
+
+fun City.toEntity(): CityEntity =
+    CityEntity(id, name, countryCode, latitude, longitude, isFavourite)

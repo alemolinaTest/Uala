@@ -10,6 +10,9 @@ interface CitiesDao {
     @Query("SELECT * FROM cities")
     suspend fun getAllCities(): List<CityEntity>
 
+    @Query("SELECT * FROM cities WHERE isFavourite = 1")
+    suspend fun getFavouriteCities(): List<CityEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(cities: List<CityEntity>)
 

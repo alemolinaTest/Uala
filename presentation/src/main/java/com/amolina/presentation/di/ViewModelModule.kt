@@ -5,7 +5,7 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     factory {
-        CitiesViewModel(get())
+        CitiesViewModel(get(), get(), get())
     }
 
 }

@@ -55,11 +55,8 @@ dependencies {
     // 💡 Dependency Injection (Koin)
     implementation(libs.koin.android)
 
-    // 💡 Networking (Retrofit & Serialization)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.gson)
+    // 💡 Networking ( Serialization)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.retrofit.serialization)
     implementation(libs.okhttp.logging)
 
     // 💡 Database (Room)
@@ -71,9 +68,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-
-    // 💡 Code Generation
-    implementation(libs.javapoet)
 
     // 💡 Testing
     testImplementation(libs.junit)

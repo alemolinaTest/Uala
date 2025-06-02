@@ -43,6 +43,8 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+    implementation(libs.compose.material.icons.extended)
+
 
     // Google Maps & Permissions
     implementation(libs.google.maps.services)
@@ -51,6 +53,9 @@ dependencies {
 
     implementation(libs.androidx.ui.tooling)
     implementation(libs.navigation.compose)
+
+    implementation(libs.androidx.paging)
+    implementation(libs.androidx.paging.compose)
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
