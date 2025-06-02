@@ -24,13 +24,17 @@ import com.amolina.domain.model.City
 fun CityListItem(
     city: City,
     onToggleFavourite: () -> Unit,
-    onCityClicked: () -> Unit
+    onCityClicked: () -> Unit,
+    isSelected: Boolean = false
 ) {
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+    else MaterialTheme.colorScheme.surface
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onCityClicked() },
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
         elevation = CardDefaults.cardElevation()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -38,7 +42,10 @@ fun CityListItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("${city.name}, ${city.countryCode}", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "${city.name}, ${city.countryCode}",
+                    style = MaterialTheme.typography.titleMedium
+                )
                 IconButton(onClick = onToggleFavourite) {
                     Icon(
                         imageVector = if (city.isFavourite) Icons.Default.Star else Icons.Default.StarBorder,

@@ -1,4 +1,4 @@
-package com.amolina.presentation.ui.components
+package com.amolina.presentation.ui.components.maps
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -18,6 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
+import com.amolina.presentation.ui.components.FilterRow
+import com.amolina.presentation.ui.components.NonPagedCitiesList
+import com.amolina.presentation.ui.components.PagedCitiesList
+import com.amolina.presentation.ui.components.SearchField
 import com.amolina.presentation.ui.viewmodel.CitiesViewModel
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -28,6 +32,8 @@ fun LandscapeCitiesMapScreen(
 ) {
     val isFavourites by viewModel.showFavouritesOnly.collectAsState()
     val selectedCity by viewModel.selectedCity.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+
 
     Row(modifier = Modifier.fillMaxSize()) {
         // Left side: City List
@@ -39,7 +45,7 @@ fun LandscapeCitiesMapScreen(
         ) {
             // Search Field with Clear Button
             SearchField(
-                query = viewModel.searchQuery.collectAsState().value,
+                query = searchQuery,
                 onQueryChanged = { viewModel.updateSearchQuery(it) },
                 onClearQuery = {
                     viewModel.updateSearchQuery("")
@@ -59,6 +65,7 @@ fun LandscapeCitiesMapScreen(
             if (usePaging) {
                 PagedCitiesList(
                     pagedCities = viewModel.pagedCities,
+                    selectedCityId = selectedCity?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
                     onCityClicked = { viewModel.selectCity(it) }
                 )
@@ -66,6 +73,7 @@ fun LandscapeCitiesMapScreen(
                 NonPagedCitiesList(
                     citiesState = viewModel.citiesState,
                     searchResults = viewModel.searchResults,
+                    selectedCityId = selectedCity?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
                     onCityClicked = { viewModel.selectCity(it) }
                 )
@@ -79,7 +87,12 @@ fun LandscapeCitiesMapScreen(
                 .fillMaxHeight()
         ) {
             selectedCity?.let { city ->
-                GoogleMapScreen(cities = listOf(city))
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    GoogleMapScreen(cities = listOf(city))
+                }
             } ?: Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

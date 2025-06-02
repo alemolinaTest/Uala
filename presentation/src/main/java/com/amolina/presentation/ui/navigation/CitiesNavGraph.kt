@@ -11,8 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.amolina.presentation.ui.components.CitiesListScreen
-import com.amolina.presentation.ui.components.LandscapeCitiesMapScreen
-import com.amolina.presentation.ui.components.MapScreen
+import com.amolina.presentation.ui.components.maps.LandscapeCitiesMapScreen
+import com.amolina.presentation.ui.components.maps.MapScreen
 import com.amolina.presentation.ui.viewmodel.CitiesViewModel
 import org.koin.androidx.compose.koinViewModel
 

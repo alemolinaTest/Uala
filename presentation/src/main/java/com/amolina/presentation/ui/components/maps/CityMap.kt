@@ -1,9 +1,7 @@
-package com.amolina.presentation.ui.components
+package com.amolina.presentation.ui.components.maps
 
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,23 +22,21 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
-@OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(35)
-@Composable
-fun GoogleMapScreen(
+@androidx.compose.runtime.Composable
+fun CityMap(
     cities: List<City>,
+    modifier: Modifier = Modifier,
+    padding: Modifier = Modifier
 ) {
-
     if (cities.isNotEmpty()) {
         val cameraPositionState = rememberCameraPositionState()
+
         LaunchedEffect(cities) {
             if (cities.size == 1) {
                 val city = cities.first()
                 cameraPositionState.position = CameraPosition(
                     LatLng(city.coord.latitude, city.coord.longitude),
-                    12f,
-                    0f,
-                    0f
+                    12f, 0f, 0f
                 )
             } else {
                 val boundsBuilder = LatLngBounds.Builder()
@@ -54,14 +50,9 @@ fun GoogleMapScreen(
         }
 
         GoogleMap(
-            modifier = Modifier
-                .fillMaxSize(),
-                //.padding(innerPadding),
+            modifier = modifier.then(padding),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(
-                isMyLocationEnabled = true,
-                mapType = MapType.NORMAL
-            ),
+            properties = MapProperties(isMyLocationEnabled = true, mapType = MapType.NORMAL),
             uiSettings = MapUiSettings(
                 zoomControlsEnabled = true,
                 myLocationButtonEnabled = true
@@ -69,7 +60,7 @@ fun GoogleMapScreen(
         ) {
             cities.forEach { city ->
                 val markerPosition = LatLng(city.coord.latitude, city.coord.longitude)
-                Marker(
+                com.google.maps.android.compose.Marker(
                     state = remember { MarkerState(position = markerPosition) },
                     title = city.name,
                     snippet = "Welcome to ${city.name} in ${city.countryCode}!"
@@ -77,12 +68,8 @@ fun GoogleMapScreen(
             }
         }
     } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(
-                text = "No cities available",
-                modifier = Modifier.align(Alignment.Center),
-                style = MaterialTheme.typography.bodyLarge
-            )
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No cities available", style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

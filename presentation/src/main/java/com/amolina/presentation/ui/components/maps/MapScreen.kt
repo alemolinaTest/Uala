@@ -1,4 +1,4 @@
-package com.amolina.presentation.ui.components
+package com.amolina.presentation.ui.components.maps
 
 import android.Manifest
 import androidx.annotation.RequiresApi

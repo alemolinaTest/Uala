@@ -1,4 +1,4 @@
-package com.amolina.presentation.ui.components
+package com.amolina.presentation.ui.components.maps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

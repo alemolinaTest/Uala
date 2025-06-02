@@ -1,9 +1,7 @@
 package com.amolina.presentation.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,17 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -47,6 +41,7 @@ fun CitiesListScreen(
     usePaging: Boolean = false
 ) {
     val isFavourites by viewModel.showFavouritesOnly.collectAsState()
+    val selectedCityId by viewModel.selectedCity.collectAsState()
 
     Scaffold(
         topBar = {
@@ -85,6 +80,7 @@ fun CitiesListScreen(
             if (usePaging) {
                 PagedCitiesList(
                     pagedCities = viewModel.pagedCities,
+                    selectedCityId = selectedCityId?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
                     onCityClicked = onCityClicked
                 )
@@ -92,6 +88,7 @@ fun CitiesListScreen(
                 NonPagedCitiesList(
                     citiesState = viewModel.citiesState,
                     searchResults = viewModel.searchResults,
+                    selectedCityId = selectedCityId?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
                     onCityClicked = onCityClicked
                 )
@@ -101,54 +98,10 @@ fun CitiesListScreen(
 }
 
 @Composable
-internal fun FilterRow(
-    isFavourites: Boolean,
-    onToggleFavourites: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text("Show Favourites Only")
-        Switch(
-            checked = isFavourites,
-            onCheckedChange = { onToggleFavourites() }
-        )
-    }
-}
-
-@Composable
-internal fun SearchField(
-    query: String,
-    onQueryChanged: (String) -> Unit,
-    onClearQuery: () -> Unit
-) {
-    TextField(
-        value = query,
-        onValueChange = { onQueryChanged(it) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        label = { Text("Search by city name") },
-        singleLine = true,
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onClearQuery() }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Clear"
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
 internal fun NonPagedCitiesList(
     citiesState: StateFlow<Resource<List<City>>>,
     searchResults: StateFlow<List<City>>,
+    selectedCityId: Int?,
     onToggleFavourite: (Int) -> Unit,
     onCityClicked: (Int) -> Unit
 ) {
@@ -163,12 +116,12 @@ internal fun NonPagedCitiesList(
                     CityListItem(
                         city = city,
                         onToggleFavourite = { onToggleFavourite(city.id) },
-                        onCityClicked = { onCityClicked(city.id) }
+                        onCityClicked = { onCityClicked(city.id) },
+                        isSelected = city.id == selectedCityId
                     )
                 }
             }
         }
-
         is Resource.Error -> {
             val error = (state as Resource.Error).message ?: "Unknown error"
             ErrorItem(error)
@@ -176,10 +129,10 @@ internal fun NonPagedCitiesList(
     }
 }
 
-
 @Composable
 internal fun PagedCitiesList(
     pagedCities: Flow<PagingData<City>>,
+    selectedCityId: Int?,
     onToggleFavourite: (Int) -> Unit,
     onCityClicked: (Int) -> Unit
 ) {
@@ -192,9 +145,8 @@ internal fun PagedCitiesList(
                 CityListItem(
                     city = it,
                     onToggleFavourite = { onToggleFavourite(it.id) },
-                    onCityClicked = {
-                        onCityClicked(it.id)
-                    }
+                    onCityClicked = { onCityClicked(it.id) },
+                    isSelected = it.id == selectedCityId
                 )
             }
         }
@@ -204,16 +156,13 @@ internal fun PagedCitiesList(
                 loadState.refresh is LoadState.Loading -> {
                     item { LoaderItem() }
                 }
-
                 loadState.append is LoadState.Loading -> {
                     item { LoaderItem() }
                 }
-
                 loadState.refresh is LoadState.Error -> {
                     val e = loadState.refresh as LoadState.Error
                     item { ErrorItem(e.error.message ?: "Unknown error") }
                 }
-
                 loadState.append is LoadState.Error -> {
                     val e = loadState.append as LoadState.Error
                     item { ErrorItem(e.error.message ?: "Unknown error") }
