@@ -30,7 +30,8 @@ import com.amolina.presentation.ui.viewmodel.CitiesViewModel
 @Composable
 fun LandscapeCitiesMapScreen(
     viewModel: CitiesViewModel,
-    usePaging: Boolean = false
+    usePaging: Boolean = false,
+    onInfoClicked: (Int) -> Unit,
 ) {
     val isFavourites by viewModel.showFavouritesOnly.collectAsState()
     val selectedCity by viewModel.selectedCity.collectAsState()
@@ -69,7 +70,9 @@ fun LandscapeCitiesMapScreen(
                     pagedCities = viewModel.pagedCities,
                     selectedCityId = selectedCity?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = { viewModel.selectCity(it) }
+                    onCityClicked = { viewModel.selectCity(it) },
+                    onInfoClicked = { onInfoClicked(it) }
+
                 )
             } else {
                 NonPagedCitiesList(
@@ -77,7 +80,8 @@ fun LandscapeCitiesMapScreen(
                     searchResults = viewModel.searchResults,
                     selectedCityId = selectedCity?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = { viewModel.selectCity(it) }
+                    onCityClicked = { viewModel.selectCity(it) },
+                    onInfoClicked = { onInfoClicked(it) }
                 )
             }
         }
@@ -99,7 +103,10 @@ fun LandscapeCitiesMapScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.select_a_city_from_the_list), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.select_a_city_from_the_list),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }

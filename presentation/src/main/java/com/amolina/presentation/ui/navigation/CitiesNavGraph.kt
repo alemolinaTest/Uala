@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.amolina.presentation.ui.components.CitiesListScreen
+import com.amolina.presentation.ui.components.CityDetailScreen
 import com.amolina.presentation.ui.components.maps.LandscapeCitiesMapScreen
 import com.amolina.presentation.ui.components.maps.MapScreen
 import com.amolina.presentation.ui.viewmodel.CitiesViewModel
@@ -29,15 +30,18 @@ fun CitiesNavGraph(navController: NavHostController) {
     ) {
         composable(Screen.CitiesList.route) {
             if (isLandscape) {
-                LandscapeCitiesMapScreen(
-                    viewModel = viewModel
-                )
+                LandscapeCitiesMapScreen(viewModel = viewModel, onInfoClicked = { cityId ->
+                    navController.navigate(Screen.CityDetail.createRoute(cityId))
+                })
             } else {
                 CitiesListScreen(
                     viewModel = viewModel,
                     usePaging = false,
-                    onCityClicked = { city ->
-                        navController.navigate(Screen.Map.createRoute(city))
+                    onCityClicked = { cityId ->
+                        navController.navigate(Screen.Map.createRoute(cityId))
+                    },
+                    onInfoClicked = { cityId ->
+                        navController.navigate(Screen.CityDetail.createRoute(cityId))
                     }
                 )
             }
@@ -48,7 +52,9 @@ fun CitiesNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("cityId") { type = NavType.StringType })
         ) { backStackEntry ->
             if (isLandscape) {
-                LandscapeCitiesMapScreen(viewModel = viewModel)
+                LandscapeCitiesMapScreen(viewModel = viewModel, onInfoClicked = { cityId ->
+                    navController.navigate(Screen.CityDetail.createRoute(cityId))
+                })
             } else {
                 val cityIdString = backStackEntry.arguments?.getString("cityId")
                 val cityId = cityIdString?.toIntOrNull()
@@ -63,13 +69,34 @@ fun CitiesNavGraph(navController: NavHostController) {
                 }
             }
         }
+
+        composable(
+            Screen.CityDetail.route,
+            arguments = listOf(navArgument("cityId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val cityIdString = backStackEntry.arguments?.getString("cityId")
+            val cityId = cityIdString?.toIntOrNull()
+            cityId?.let {
+                val city = viewModel.getCityById(it)
+                city?.let {
+                    CityDetailScreen(
+                        city = it,
+                        onToggleFavourite = { cityId -> viewModel.toggleFavourite(cityId) },
+                        onBackPressed = { navController.navigateUp() }
+                    )
+                }
+            }
+        }
     }
 }
-
 
 sealed class Screen(val route: String) {
     object CitiesList : Screen("cities_list")
     object Map : Screen("map/{cityId}") {
         fun createRoute(cityId: Int) = "map/$cityId"
+    }
+
+    object CityDetail : Screen("city_detail/{cityId}") {
+        fun createRoute(cityId: Int) = "city_detail/$cityId"
     }
 }

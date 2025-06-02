@@ -40,8 +40,9 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun CitiesListScreen(
     viewModel: CitiesViewModel,
+    usePaging: Boolean = false,
     onCityClicked: (Int) -> Unit,
-    usePaging: Boolean = false
+    onInfoClicked: (Int) -> Unit,
 ) {
     val isFavourites by viewModel.showFavouritesOnly.collectAsState()
     val selectedCityId by viewModel.selectedCity.collectAsState()
@@ -97,7 +98,8 @@ fun CitiesListScreen(
                     pagedCities = viewModel.pagedCities,
                     selectedCityId = selectedCityId?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = onCityClicked
+                    onCityClicked = onCityClicked,
+                    onInfoClicked = { onInfoClicked(it) }
                 )
             } else {
                 NonPagedCitiesList(
@@ -105,7 +107,8 @@ fun CitiesListScreen(
                     searchResults = viewModel.searchResults,
                     selectedCityId = selectedCityId?.id,
                     onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = onCityClicked
+                    onCityClicked = onCityClicked,
+                    onInfoClicked = { onInfoClicked(it) }
                 )
             }
         }
@@ -118,7 +121,8 @@ internal fun NonPagedCitiesList(
     searchResults: StateFlow<List<City>>,
     selectedCityId: Int?,
     onToggleFavourite: (Int) -> Unit,
-    onCityClicked: (Int) -> Unit
+    onCityClicked: (Int) -> Unit,
+    onInfoClicked: (Int) -> Unit,
 ) {
     val state by citiesState.collectAsState()
     val results by searchResults.collectAsState()
@@ -132,7 +136,8 @@ internal fun NonPagedCitiesList(
                         city = city,
                         onToggleFavourite = { onToggleFavourite(city.id) },
                         onCityClicked = { onCityClicked(city.id) },
-                        isSelected = city.id == selectedCityId
+                        isSelected = city.id == selectedCityId,
+                        onInfoClicked = { onInfoClicked(city.id) }
                     )
                 }
             }
@@ -150,7 +155,8 @@ internal fun PagedCitiesList(
     pagedCities: Flow<PagingData<City>>,
     selectedCityId: Int?,
     onToggleFavourite: (Int) -> Unit,
-    onCityClicked: (Int) -> Unit
+    onCityClicked: (Int) -> Unit,
+    onInfoClicked: (Int) -> Unit,
 ) {
     val items = pagedCities.collectAsLazyPagingItems()
 
@@ -162,7 +168,8 @@ internal fun PagedCitiesList(
                     city = it,
                     onToggleFavourite = { onToggleFavourite(it.id) },
                     onCityClicked = { onCityClicked(it.id) },
-                    isSelected = it.id == selectedCityId
+                    isSelected = it.id == selectedCityId,
+                    onInfoClicked = { onInfoClicked(it.id) }
                 )
             }
         }
