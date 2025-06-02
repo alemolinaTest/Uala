@@ -5,48 +5,53 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.amolina.domain.model.City
-import com.amolina.domain.usecase.GetCitiesPagedUseCase
-import com.amolina.domain.usecase.GetCitiesUseCase
-import com.amolina.domain.usecase.GetFavouriteCitiesUseCase
-import com.amolina.domain.usecase.ToggleFavouriteUseCase
+import com.amolina.domain.usecase.*
 import com.amolina.domain.util.Resource
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-// at first i wanted Data-layer class injected directly
-// because android pager library cant be used on domain module
-// to create a use case
-//but i decide to get android paging functionality on domain module
-// by creating a use case. in order to use data-layer class and have a better separation of concerns
-// to test
 class CitiesViewModel(
     private val getCitiesUseCase: GetCitiesUseCase,
     private val toggleFavouriteUseCase: ToggleFavouriteUseCase,
     private val getFavouriteCitiesUseCase: GetFavouriteCitiesUseCase,
-    getCitiesPagedUseCase: GetCitiesPagedUseCase,
-
+    private val getCitiesPagedUseCase: GetCitiesPagedUseCase,
+    private val searchCitiesUseCase: SearchCitiesUseCase
 ) : ViewModel() {
 
     private val _citiesState = MutableStateFlow<Resource<List<City>>>(Resource.Loading)
     val citiesState: StateFlow<Resource<List<City>>> get() = _citiesState
 
-    // Paged data
     val pagedCities: Flow<PagingData<City>> =
         getCitiesPagedUseCase().cachedIn(viewModelScope)
 
-    private var showFavouritesOnly = false
-    fun isShowingFavourites(): Boolean = showFavouritesOnly
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> get() = _searchQuery
+
+    private val _searchResults = MutableStateFlow<List<City>>(emptyList())
+    val searchResults: StateFlow<List<City>> get() = _searchResults
+
+    private val _showFavouritesOnly = MutableStateFlow(false)
+    val showFavouritesOnly: StateFlow<Boolean> get() = _showFavouritesOnly
 
     init {
+        // Initial fetch
         fetchCities()
+        observeCitiesState()
+    }
+
+    private fun observeCitiesState() {
+        viewModelScope.launch {
+            _citiesState.collectLatest { resource ->
+                if (_searchQuery.value.isBlank() && resource is Resource.Success) {
+                    _searchResults.value = resource.data
+                }
+            }
+        }
     }
 
     fun fetchCities() {
         viewModelScope.launch {
-            val flow = if (showFavouritesOnly) {
+            val flow = if (showFavouritesOnly.value) {
                 getFavouriteCitiesUseCase()
             } else {
                 getCitiesUseCase()
@@ -57,15 +62,40 @@ class CitiesViewModel(
         }
     }
 
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+        performSearch()
+    }
+
+    private fun performSearch() {
+        viewModelScope.launch {
+            if (_searchQuery.value.isBlank()) {
+                // If the search query is empty, just show all cities from latest state
+                val current = _citiesState.value
+                if (current is Resource.Success) {
+                    _searchResults.value = current.data
+                }
+            } else {
+                val filteredCities = searchCitiesUseCase(
+                    prefix = _searchQuery.value,
+                    favouritesOnly = showFavouritesOnly.value
+                )
+                _searchResults.value = filteredCities
+            }
+        }
+    }
+
     fun toggleShowFavourites() {
-        showFavouritesOnly = !showFavouritesOnly
+        _showFavouritesOnly.value = !_showFavouritesOnly.value
         fetchCities()
+        performSearch()
     }
 
     fun toggleFavourite(cityId: Int) {
         viewModelScope.launch {
             toggleFavouriteUseCase(cityId)
-            fetchCities() // refresh data after toggling
+            fetchCities()
+            performSearch()
         }
     }
 }

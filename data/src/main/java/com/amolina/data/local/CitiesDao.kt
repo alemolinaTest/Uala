@@ -26,4 +26,18 @@ interface CitiesDao {
     @Query("SELECT * FROM cities ORDER BY name ASC")
     fun getAllCitiesPaged(): PagingSource<Int, CityEntity>
 
+    @Query("""
+        SELECT * FROM cities
+        WHERE name LIKE :prefix || '%' COLLATE NOCASE
+        ORDER BY name ASC, countryCode ASC
+    """)
+    suspend fun searchCities(prefix: String): List<CityEntity>
+
+    @Query("""
+        SELECT * FROM cities
+        WHERE name LIKE :prefix || '%' COLLATE NOCASE AND isFavourite = 1
+        ORDER BY name ASC, countryCode ASC
+    """)
+    suspend fun searchFavouriteCities(prefix: String): List<CityEntity>
+
 }

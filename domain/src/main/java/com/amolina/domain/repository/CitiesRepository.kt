@@ -9,6 +9,6 @@ interface CitiesRepository {
      fun getCities(): Flow<Resource<List<City>>>
      fun getFavouriteCities(): Flow<Resource<List<City>>>
      suspend fun toggleFavourite(cityId: Int)
-     fun getCitiesPaged(): Flow<PagingData<City>>  // Add this!
-
+     fun getCitiesPaged(): Flow<PagingData<City>>
+     suspend fun searchCities(prefix: String, favouritesOnly: Boolean): List<City>
 }

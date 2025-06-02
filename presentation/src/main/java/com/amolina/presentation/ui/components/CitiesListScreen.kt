@@ -15,124 +15,180 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.amolina.domain.model.City
 import com.amolina.domain.util.Resource
 import com.amolina.presentation.ui.viewmodel.CitiesViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun CitiesListScreen(
     viewModel: CitiesViewModel,
     onCityClicked: (Int) -> Unit,
-    usePaging: Boolean = false // default to non-paged mode
+    usePaging: Boolean = false
 ) {
+
+    val isFavourites by viewModel.showFavouritesOnly.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Filter toggle
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Show Favourites Only")
-            Switch(
-                checked = viewModel.isShowingFavourites(),
-                onCheckedChange = { viewModel.toggleShowFavourites() }
-            )
-        }
+        SearchField(
+            query = viewModel.searchQuery.collectAsState().value,
+            onQueryChanged = { viewModel.updateSearchQuery(it) }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        FilterRow(
+            isFavourites = isFavourites,
+            onToggleFavourites = { viewModel.toggleShowFavourites() }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (usePaging) {
-            // Paged data
-            val pagedCities = viewModel.pagedCities.collectAsLazyPagingItems()
+            PagedCitiesList(
+                pagedCities = viewModel.pagedCities,
+                onToggleFavourite = { viewModel.toggleFavourite(it) },
+                onCityClicked = onCityClicked
+            )
+        } else {
+            NonPagedCitiesList(
+                citiesState = viewModel.citiesState,
+                searchResults = viewModel.searchResults,
+                onToggleFavourite = { viewModel.toggleFavourite(it) },
+                onCityClicked = onCityClicked
+            )
+        }
+    }
+}
 
+@Composable
+private fun FilterRow(
+    isFavourites: Boolean,
+    onToggleFavourites: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text("Show Favourites Only")
+        Switch(
+            checked = isFavourites,
+            onCheckedChange = { onToggleFavourites() }
+        )
+    }
+}
+
+@Composable
+private fun SearchField(
+    query: String,
+    onQueryChanged: (String) -> Unit
+) {
+    TextField(
+        value = query,
+        onValueChange = { onQueryChanged(it) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        label = { Text("Search by city name") },
+        singleLine = true
+    )
+}
+
+@Composable
+private fun NonPagedCitiesList(
+    citiesState: StateFlow<Resource<List<City>>>,
+    searchResults: StateFlow<List<City>>,
+    onToggleFavourite: (Int) -> Unit,
+    onCityClicked: (Int) -> Unit
+) {
+    val state by citiesState.collectAsState()
+    val results by searchResults.collectAsState()
+
+    when (state) {
+        is Resource.Loading -> LoaderItem()
+        is Resource.Success -> {
             LazyColumn {
-                items(pagedCities.itemCount) { index ->
-                    val city = pagedCities[index]
-                    if (city != null) {
-                        CityListItem(
-                            city = city,
-                            onToggleFavourite = { viewModel.toggleFavourite(city.id) },
-                            onCityClicked = { onCityClicked(city.id) }
-                        )
-                    }
-                }
-
-                pagedCities.apply {
-                    when {
-                        loadState.refresh is androidx.paging.LoadState.Loading -> {
-                            item { LoaderItemComposable() }
-                        }
-                        loadState.append is androidx.paging.LoadState.Loading -> {
-                            item { LoaderItemComposable() }
-                        }
-                        loadState.refresh is androidx.paging.LoadState.Error -> {
-                            val e = loadState.refresh as androidx.paging.LoadState.Error
-                            item { ErrorItemComposable(e.error.message ?: "Unknown error") }
-                        }
-                        loadState.append is androidx.paging.LoadState.Error -> {
-                            val e = loadState.append as androidx.paging.LoadState.Error
-                            item { ErrorItemComposable(e.error.message ?: "Unknown error") }
-                        }
-                    }
+                items(results) { city ->
+                    CityListItem(
+                        city = city,
+                        onToggleFavourite = { onToggleFavourite(city.id) },
+                        onCityClicked = { onCityClicked(city.id) }
+                    )
                 }
             }
-        } else {
-            // Non-paged data
-            val citiesState by viewModel.citiesState.collectAsState()
+        }
+        is Resource.Error -> {
+            val error = (state as Resource.Error).message ?: "Unknown error"
+            ErrorItem(error)
+        }
+    }
+}
 
-            when (citiesState) {
-                is Resource.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+
+@Composable
+private fun PagedCitiesList(
+    pagedCities: Flow<PagingData<City>>,
+    onToggleFavourite: (Int) -> Unit,
+    onCityClicked: (Int) -> Unit
+) {
+    val items = pagedCities.collectAsLazyPagingItems()
+
+    LazyColumn {
+        items(items.itemCount) { index ->
+            val city = items[index]
+            city?.let {
+                CityListItem(
+                    city = it,
+                    onToggleFavourite = { onToggleFavourite(it.id) },
+                    onCityClicked = { onCityClicked(it.id) }
+                )
+            }
+        }
+
+        items.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    item { LoaderItem() }
                 }
-
-                is Resource.Success -> {
-                    val cities = (citiesState as Resource.Success<List<City>>).data
-                    LazyColumn {
-                        items(cities) { city ->
-                            CityListItem(
-                                city = city,
-                                onToggleFavourite = { viewModel.toggleFavourite(city.id) },
-                                onCityClicked = { onCityClicked(city.id) }
-                            )
-                        }
-                    }
+                loadState.append is LoadState.Loading -> {
+                    item { LoaderItem() }
                 }
-
-                is Resource.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error: ${(citiesState as Resource.Error).message ?: "Unknown error"}",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                loadState.refresh is LoadState.Error -> {
+                    val e = loadState.refresh as LoadState.Error
+                    item { ErrorItem(e.error.message ?: "Unknown error") }
+                }
+                loadState.append is LoadState.Error -> {
+                    val e = loadState.append as LoadState.Error
+                    item { ErrorItem(e.error.message ?: "Unknown error") }
                 }
             }
         }
     }
 }
+
 @Composable
-private fun LoaderItemComposable() {
+internal fun LoaderItem() {
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
@@ -140,9 +196,16 @@ private fun LoaderItemComposable() {
 }
 
 @Composable
-private fun ErrorItemComposable(message: String) {
-    Text(
-        text = "Error: $message",
-        color = MaterialTheme.colorScheme.error
-    )
+internal fun ErrorItem(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Error: $message",
+            color = MaterialTheme.colorScheme.error
+        )
+    }
 }

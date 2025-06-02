@@ -10,7 +10,8 @@ val viewModelModule = module {
             getCitiesUseCase = get(),
             toggleFavouriteUseCase = get(),
             getFavouriteCitiesUseCase = get(),
-            getCitiesPagedUseCase = get()
+            getCitiesPagedUseCase = get(),
+            searchCitiesUseCase = get(),
         )
     }
 

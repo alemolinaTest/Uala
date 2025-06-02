@@ -91,4 +91,13 @@ class CitiesRepositoryImpl(
         }
     }
 
+    override suspend fun searchCities(prefix: String, favouritesOnly: Boolean): List<City> {
+        val localCities = if (favouritesOnly) {
+            dao.searchFavouriteCities(prefix)
+        } else {
+            dao.searchCities(prefix)
+        }
+        return localCities.map { it.toDomain() }
+    }
+
 }
