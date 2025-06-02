@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favourite">Favourite</string>
+    <string name="unfavourite">Unfavourite</string>
+    <string name="search_by_city_name">Search by city name</string>
+    <string name="clear">Clear</string>
+    <string name="cities_app">Cities App</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="error">Error: %1$s</string>
+    <string name="location_permissions_granted_you_can_use_location_based_features">Location permissions granted. You can use location-based features.</string>
+    <string name="select_a_city_from_the_list">Select a city from the list</string>
+    <string name="map_view">Map View</string>
+    <string name="back">Back</string>
+    <string name="welcome_to_in">Welcome to %1$s in %2$s!</string>
+    <string name="no_cities_available">No cities available</string>
+</resources>

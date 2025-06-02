@@ -8,7 +8,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.amolina.presentation.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 
@@ -25,7 +27,7 @@ fun LocationPermissionScreen(locationPermissionsState: MultiplePermissionsState)
     ) {
         when {
             locationPermissionsState.allPermissionsGranted -> {
-                Text("Location permissions granted. You can use location-based features.")
+                Text(stringResource(R.string.location_permissions_granted_you_can_use_location_based_features))
             }
             else -> {
                 // Initial state or denied without rationale

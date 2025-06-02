@@ -17,8 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.amolina.domain.model.City
+import com.amolina.presentation.R
 
 @Composable
 fun CityListItem(
@@ -27,8 +29,11 @@ fun CityListItem(
     onCityClicked: () -> Unit,
     isSelected: Boolean = false
 ) {
-    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-    else MaterialTheme.colorScheme.surface
+    val backgroundColor = if (isSelected)
+        MaterialTheme.colorScheme.tertiary
+    else
+        MaterialTheme.colorScheme.secondary
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,7 +54,9 @@ fun CityListItem(
                 IconButton(onClick = onToggleFavourite) {
                     Icon(
                         imageVector = if (city.isFavourite) Icons.Default.Star else Icons.Default.StarBorder,
-                        contentDescription = if (city.isFavourite) "Unfavourite" else "Favourite"
+                        contentDescription = if (city.isFavourite) stringResource(R.string.unfavourite) else stringResource(
+                            R.string.favourite
+                        )
                     )
                 }
             }

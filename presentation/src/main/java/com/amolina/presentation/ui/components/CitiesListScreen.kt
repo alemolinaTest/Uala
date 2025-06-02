@@ -18,17 +18,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.amolina.domain.model.City
 import com.amolina.domain.util.Resource
+import com.amolina.presentation.R
 import com.amolina.presentation.ui.viewmodel.CitiesViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,10 +49,22 @@ fun CitiesListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cities App") },
+                title = {
+                    Text(
+                        stringResource(R.string.cities_app),
+                        color = MaterialTheme.colorScheme.onPrimary // Text color on header
+                    )
+                },
                 navigationIcon = {
-                    Icon(imageVector = Icons.Default.LocationCity, contentDescription = null)
-                }
+                    Icon(
+                        imageVector = Icons.Default.LocationCity,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             )
         }
     ) { innerPadding ->
@@ -122,8 +137,9 @@ internal fun NonPagedCitiesList(
                 }
             }
         }
+
         is Resource.Error -> {
-            val error = (state as Resource.Error).message ?: "Unknown error"
+            val error = (state as Resource.Error).message ?: stringResource(R.string.unknown_error)
             ErrorItem(error)
         }
     }
@@ -156,16 +172,19 @@ internal fun PagedCitiesList(
                 loadState.refresh is LoadState.Loading -> {
                     item { LoaderItem() }
                 }
+
                 loadState.append is LoadState.Loading -> {
                     item { LoaderItem() }
                 }
+
                 loadState.refresh is LoadState.Error -> {
                     val e = loadState.refresh as LoadState.Error
-                    item { ErrorItem(e.error.message ?: "Unknown error") }
+                    item { ErrorItem(e.error.message ?: stringResource(R.string.unknown_error)) }
                 }
+
                 loadState.append is LoadState.Error -> {
                     val e = loadState.append as LoadState.Error
-                    item { ErrorItem(e.error.message ?: "Unknown error") }
+                    item { ErrorItem(e.error.message ?: stringResource(R.string.unknown_error)) }
                 }
             }
         }
@@ -193,7 +212,7 @@ internal fun ErrorItem(message: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Error: $message",
+            text = stringResource(R.string.error, message),
             color = MaterialTheme.colorScheme.error
         )
     }

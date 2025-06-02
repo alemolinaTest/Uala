@@ -8,10 +8,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import com.amolina.domain.model.City
+import com.amolina.presentation.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -71,14 +72,14 @@ fun GoogleMapScreen(
                 Marker(
                     state = MarkerState(position = markerPosition),
                     title = city.name,
-                    snippet = "Welcome to ${city.name} in ${city.countryCode}!"
+                    snippet = stringResource(R.string.welcome_to_in, city.name, city.countryCode)
                 )
             }
         }
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
-                text = "No cities available",
+                text = stringResource(R.string.no_cities_available),
                 modifier = Modifier.align(Alignment.Center),
                 style = MaterialTheme.typography.bodyLarge
             )

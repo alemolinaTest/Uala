@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
+import com.amolina.presentation.R
 import com.amolina.presentation.ui.components.FilterRow
 import com.amolina.presentation.ui.components.NonPagedCitiesList
 import com.amolina.presentation.ui.components.PagedCitiesList
@@ -97,7 +99,7 @@ fun LandscapeCitiesMapScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Select a city from the list", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.select_a_city_from_the_list), style = MaterialTheme.typography.bodyLarge)
             }
         }
     }

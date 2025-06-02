@@ -13,7 +13,7 @@ import com.amolina.data.remote.CitiesApiService
 import com.amolina.domain.model.City
 import com.amolina.domain.repository.CitiesRepository
 import com.amolina.domain.util.Resource
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.map
 
 class CitiesRepositoryImpl(
     private val dao: CitiesDao,
-    private val api: CitiesApiService
+    private val api: CitiesApiService,
+    private val ioDispatcher: CoroutineDispatcher
 ) : CitiesRepository {
 
     override fun getCities(): Flow<Resource<List<City>>> = flow {
@@ -61,13 +62,13 @@ class CitiesRepositoryImpl(
         } catch (e: Exception) {
             emit(Resource.Error(e, e.message))
         }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(ioDispatcher)
 
     override fun getFavouriteCities(): Flow<Resource<List<City>>> = flow {
         emit(Resource.Loading)
         val local = dao.getFavouriteCities().sortedBy { it.name }
         emit(Resource.Success(local.map { it.toDomain() }, isFromCache = true))
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(ioDispatcher)
 
     override suspend fun toggleFavourite(cityId: Int) {
         val city = dao.getCityById(cityId)
@@ -84,7 +85,7 @@ class CitiesRepositoryImpl(
                 prefetchDistance = 5,
                 enablePlaceholders = false// disables null placeholders, speeds up UI binding
             ),
-            remoteMediator = CitiesRemoteMediator(dao, api),
+            remoteMediator = CitiesRemoteMediator(dao, api, ioDispatcher),
             pagingSourceFactory = { dao.getAllCitiesPaged() }
         ).flow.map { pagingData ->
             pagingData.map { it.toDomain() }
