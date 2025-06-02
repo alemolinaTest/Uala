@@ -43,12 +43,12 @@ android {
 }
 
 dependencies {
-    // 💡 Modules
+    //  Modules
     implementation(project(":presentation"))
     implementation(project(":domain"))
     implementation(project(":data"))
 
-    // 💡 Core Libraries
+    //  Core Libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -59,21 +59,21 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.okhttp.logging)
 
-    // 💡 Navigation
+    //  Navigation
     implementation(libs.navigation.compose)
 
-    // 💡 Dependency Injection (Koin)
+    //  Dependency Injection (Koin)
     implementation(libs.koin.core)
     implementation(libs.koin.androidx.compose)
 
-    // 💡 Testing Libraries
+    //  Testing Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
-    // 💡 Debug Libraries
+    //  Debug Libraries
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 

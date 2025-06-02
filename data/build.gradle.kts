@@ -49,27 +49,33 @@ ksp {
 }
 
 dependencies {
-    // 💡 Module Dependencies
+    //  Module Dependencies
     implementation(project(":domain"))
 
-    // 💡 Dependency Injection (Koin)
+    //  Dependency Injection (Koin)
     implementation(libs.koin.android)
 
-    // 💡 Networking ( Serialization)
+    //  Networking ( Serialization)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp.logging)
 
-    // 💡 Database (Room)
+    implementation(libs.androidx.paging)
+    implementation(libs.androidx.paging.compose)
+
+
+    //  Database (Room)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    implementation(libs.room.paging)
 
-    // 💡 AndroidX Core & UI
+
+    //  AndroidX Core & UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-    // 💡 Testing
+    //  Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

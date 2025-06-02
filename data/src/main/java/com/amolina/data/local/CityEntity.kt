@@ -1,10 +1,13 @@
 package com.amolina.data.local
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.amolina.domain.model.City
 
-@Entity(tableName = "cities")
+@Entity(tableName = "cities",
+    indices = [Index(value = ["name"])]
+)
 data class CityEntity(
     @PrimaryKey val id: Int,
     val name: String,

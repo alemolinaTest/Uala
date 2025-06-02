@@ -1,5 +1,6 @@
 package com.amolina.data.local
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -21,5 +22,8 @@ interface CitiesDao {
 
     @Query("UPDATE cities SET isFavourite = :isFavourite WHERE id = :cityId")
     suspend fun updateFavourite(cityId: Int, isFavourite: Boolean)
+
+    @Query("SELECT * FROM cities ORDER BY name ASC")
+    fun getAllCitiesPaged(): PagingSource<Int, CityEntity>
 
 }

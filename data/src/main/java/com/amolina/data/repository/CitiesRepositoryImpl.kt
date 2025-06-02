@@ -1,5 +1,11 @@
 package com.amolina.data.repository
 
+
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.amolina.data.local.CitiesDao
 import com.amolina.data.local.toDomain
 import com.amolina.data.local.toEntity
@@ -11,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 class CitiesRepositoryImpl(
     private val dao: CitiesDao,
@@ -66,6 +73,21 @@ class CitiesRepositoryImpl(
         val city = dao.getCityById(cityId)
         city?.let {
             dao.updateFavourite(cityId, !it.isFavourite)
+        }
+    }
+
+    @OptIn(ExperimentalPagingApi::class)
+    override fun getCitiesPaged(): Flow<PagingData<City>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                prefetchDistance = 5,
+                enablePlaceholders = false// disables null placeholders, speeds up UI binding
+            ),
+            remoteMediator = CitiesRemoteMediator(dao, api),
+            pagingSourceFactory = { dao.getAllCitiesPaged() }
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
         }
     }
 

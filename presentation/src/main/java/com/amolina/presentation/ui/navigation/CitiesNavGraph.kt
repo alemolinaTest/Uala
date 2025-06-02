@@ -21,6 +21,8 @@ fun CitiesNavGraph(navController: NavHostController, modifier: Modifier = Modifi
             val viewModel: CitiesViewModel = koinViewModel()
             CitiesListScreen(
                 viewModel = viewModel,
+                usePaging = false,//change it to get paged data or all data at same time.
+                // Paged takes 13 and not paged takes 5 secs secs from api fetch
                 onCityClicked = { cityId ->
                     navController.navigate(Screen.CityDetail.createRoute(cityId))
                 }
