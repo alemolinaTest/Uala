@@ -4,8 +4,10 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.amolina.domain.model.City
+import com.amolina.domain.model.CoordDto
 
-@Entity(tableName = "cities",
+@Entity(
+    tableName = "cities",
     indices = [Index(value = ["name"])]
 )
 data class CityEntity(
@@ -18,7 +20,7 @@ data class CityEntity(
 )
 
 fun CityEntity.toDomain(): City =
-    City(id, name, countryCode, latitude, longitude, isFavourite)
+    City(id, name, countryCode, coord = CoordDto(latitude, longitude), isFavourite)
 
 fun City.toEntity(): CityEntity =
-    CityEntity(id, name, countryCode, latitude, longitude, isFavourite)
+    CityEntity(id, name, countryCode, coord.latitude, coord.longitude, isFavourite)

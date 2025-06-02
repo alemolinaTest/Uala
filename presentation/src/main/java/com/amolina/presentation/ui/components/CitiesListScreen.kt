@@ -11,18 +11,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -32,53 +39,69 @@ import com.amolina.presentation.ui.viewmodel.CitiesViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitiesListScreen(
     viewModel: CitiesViewModel,
     onCityClicked: (Int) -> Unit,
     usePaging: Boolean = false
 ) {
-
     val isFavourites by viewModel.showFavouritesOnly.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        SearchField(
-            query = viewModel.searchQuery.collectAsState().value,
-            onQueryChanged = { viewModel.updateSearchQuery(it) }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        FilterRow(
-            isFavourites = isFavourites,
-            onToggleFavourites = { viewModel.toggleShowFavourites() }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (usePaging) {
-            PagedCitiesList(
-                pagedCities = viewModel.pagedCities,
-                onToggleFavourite = { viewModel.toggleFavourite(it) },
-                onCityClicked = onCityClicked
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Cities App") },
+                navigationIcon = {
+                    Icon(imageVector = Icons.Default.LocationCity, contentDescription = null)
+                }
             )
-        } else {
-            NonPagedCitiesList(
-                citiesState = viewModel.citiesState,
-                searchResults = viewModel.searchResults,
-                onToggleFavourite = { viewModel.toggleFavourite(it) },
-                onCityClicked = onCityClicked
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            SearchField(
+                query = viewModel.searchQuery.collectAsState().value,
+                onQueryChanged = { viewModel.updateSearchQuery(it) },
+                onClearQuery = {
+                    viewModel.updateSearchQuery("")
+                    viewModel.fetchCities()
+                }
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            FilterRow(
+                isFavourites = isFavourites,
+                onToggleFavourites = { viewModel.toggleShowFavourites() }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (usePaging) {
+                PagedCitiesList(
+                    pagedCities = viewModel.pagedCities,
+                    onToggleFavourite = { viewModel.toggleFavourite(it) },
+                    onCityClicked = onCityClicked
+                )
+            } else {
+                NonPagedCitiesList(
+                    citiesState = viewModel.citiesState,
+                    searchResults = viewModel.searchResults,
+                    onToggleFavourite = { viewModel.toggleFavourite(it) },
+                    onCityClicked = onCityClicked
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun FilterRow(
+internal fun FilterRow(
     isFavourites: Boolean,
     onToggleFavourites: () -> Unit
 ) {
@@ -96,9 +119,10 @@ private fun FilterRow(
 }
 
 @Composable
-private fun SearchField(
+internal fun SearchField(
     query: String,
-    onQueryChanged: (String) -> Unit
+    onQueryChanged: (String) -> Unit,
+    onClearQuery: () -> Unit
 ) {
     TextField(
         value = query,
@@ -107,12 +131,22 @@ private fun SearchField(
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         label = { Text("Search by city name") },
-        singleLine = true
+        singleLine = true,
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onClearQuery() }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Clear"
+                    )
+                }
+            }
+        }
     )
 }
 
 @Composable
-private fun NonPagedCitiesList(
+internal fun NonPagedCitiesList(
     citiesState: StateFlow<Resource<List<City>>>,
     searchResults: StateFlow<List<City>>,
     onToggleFavourite: (Int) -> Unit,
@@ -134,6 +168,7 @@ private fun NonPagedCitiesList(
                 }
             }
         }
+
         is Resource.Error -> {
             val error = (state as Resource.Error).message ?: "Unknown error"
             ErrorItem(error)
@@ -143,7 +178,7 @@ private fun NonPagedCitiesList(
 
 
 @Composable
-private fun PagedCitiesList(
+internal fun PagedCitiesList(
     pagedCities: Flow<PagingData<City>>,
     onToggleFavourite: (Int) -> Unit,
     onCityClicked: (Int) -> Unit
@@ -157,7 +192,9 @@ private fun PagedCitiesList(
                 CityListItem(
                     city = it,
                     onToggleFavourite = { onToggleFavourite(it.id) },
-                    onCityClicked = { onCityClicked(it.id) }
+                    onCityClicked = {
+                        onCityClicked(it.id)
+                    }
                 )
             }
         }
@@ -167,13 +204,16 @@ private fun PagedCitiesList(
                 loadState.refresh is LoadState.Loading -> {
                     item { LoaderItem() }
                 }
+
                 loadState.append is LoadState.Loading -> {
                     item { LoaderItem() }
                 }
+
                 loadState.refresh is LoadState.Error -> {
                     val e = loadState.refresh as LoadState.Error
                     item { ErrorItem(e.error.message ?: "Unknown error") }
                 }
+
                 loadState.append is LoadState.Error -> {
                     val e = loadState.append as LoadState.Error
                     item { ErrorItem(e.error.message ?: "Unknown error") }

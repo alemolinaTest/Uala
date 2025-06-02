@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -15,6 +18,18 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        // Load secrets.properties explicitly
+        val secretsFile = rootProject.file("secrets.properties")
+        if (secretsFile.exists()) {
+            val secrets = Properties()
+            secrets.load(FileInputStream(secretsFile))
+            manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = secrets["GOOGLE_MAPS_API_KEY"] ?: ""
+        } else {
+            throw GradleException("secrets.properties file not found!")
+        }
+
+        println("Google Maps API Key: ${manifestPlaceholders["GOOGLE_MAPS_API_KEY"]}")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

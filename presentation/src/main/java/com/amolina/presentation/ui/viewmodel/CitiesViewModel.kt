@@ -33,6 +33,10 @@ class CitiesViewModel(
     private val _showFavouritesOnly = MutableStateFlow(false)
     val showFavouritesOnly: StateFlow<Boolean> get() = _showFavouritesOnly
 
+    private val _selectedCity = MutableStateFlow<City?>(null)
+    val selectedCity: StateFlow<City?> = _selectedCity
+
+
     init {
         // Initial fetch
         fetchCities()
@@ -85,6 +89,17 @@ class CitiesViewModel(
         }
     }
 
+    fun getCityById(cityId: Int): City? {
+        // 1. Try search results first (if search is active)
+        val searchCities = _searchResults.value
+        val fromSearch = searchCities.find { it.id == cityId }
+        if (fromSearch != null) return fromSearch
+
+        // 2. Otherwise, get from all cities
+        val allCities = (_citiesState.value as? Resource.Success)?.data ?: emptyList()
+        return allCities.find { it.id == cityId }
+    }
+
     fun toggleShowFavourites() {
         _showFavouritesOnly.value = !_showFavouritesOnly.value
         fetchCities()
@@ -97,5 +112,9 @@ class CitiesViewModel(
             fetchCities()
             performSearch()
         }
+    }
+
+    fun selectCity(cityId: Int) {
+        _selectedCity.value = getCityById(cityId)
     }
 }

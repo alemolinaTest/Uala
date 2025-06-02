@@ -19,7 +19,9 @@ class CitiesApiService (
                 throw Exception("Failed to fetch cities: ${response.code}")
             }
             val jsonString = response.body?.string() ?: throw Exception("Empty response body")
-            return@use json.decodeFromString<List<City>>(jsonString)
+            val cityDtos = json.decodeFromString<List<City>>(jsonString)
+            return@use cityDtos
         }
     }
+
 }

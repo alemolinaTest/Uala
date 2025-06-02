@@ -7,8 +7,13 @@ import kotlinx.serialization.SerialName
 data class City(
     @SerialName("_id") val id: Int = 0,
     val name: String,
-    val countryCode: String = "",
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
+    @SerialName("country") val countryCode: String = "",
+    val coord: CoordDto,
     val isFavourite: Boolean = false
+)
+
+@Serializable
+data class CoordDto(
+    @SerialName("lat") val latitude: Double = 0.0,
+    @SerialName("lon") val longitude: Double = 0.0,
 )
