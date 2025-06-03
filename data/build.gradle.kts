@@ -41,11 +41,13 @@ android {
     buildFeatures {
         buildConfig = true
     }
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 }
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
-    arg("moshi.kotlin.codegen.generateKotlinJsonAdapter", "true")
 }
 
 dependencies {
@@ -76,7 +78,17 @@ dependencies {
     implementation(libs.material)
 
     //  Testing
+    //  Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.paging.common)
+    testImplementation(libs.arch.core.testing)
 }

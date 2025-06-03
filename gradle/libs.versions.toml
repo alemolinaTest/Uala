@@ -33,6 +33,14 @@ kotlinjvm = "1.9.23"
 paging = "3.2.1"
 javax-inject = "1"
 
+junit5 = "5.10.0"
+mockito = "5.3.1"
+mockito-kotlin = "5.1.0"
+kotlin-coroutines-test = "1.7.3"
+kotlin-test = "1.9.10"
+turbine = "1.0.0"
+arch-core-testing = "2.2.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -86,7 +94,17 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 
 androidx-paging = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
+# testing
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines-test" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-test" }
 
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
+arch-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "arch-core-testing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
