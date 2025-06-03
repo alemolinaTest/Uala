@@ -10,31 +10,31 @@ import com.amolina.domain.util.Resource
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class CitiesViewModel(
+open class CitiesViewModel(
     private val getCitiesUseCase: GetCitiesUseCase,
     private val toggleFavouriteUseCase: ToggleFavouriteUseCase,
     private val getFavouriteCitiesUseCase: GetFavouriteCitiesUseCase,
     private val getCitiesPagedUseCase: GetCitiesPagedUseCase,
     private val searchCitiesUseCase: SearchCitiesUseCase
-) : ViewModel() {
+) : ViewModel() , ICitiesViewModel{
 
     private val _citiesState = MutableStateFlow<Resource<List<City>>>(Resource.Loading)
-    val citiesState: StateFlow<Resource<List<City>>> get() = _citiesState
+    override val citiesState: StateFlow<Resource<List<City>>> get() = _citiesState
 
-    val pagedCities: Flow<PagingData<City>> =
+    override val pagedCities: Flow<PagingData<City>> =
         getCitiesPagedUseCase().cachedIn(viewModelScope)
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> get() = _searchQuery
+    override val searchQuery: StateFlow<String> get() = _searchQuery
 
     private val _searchResults = MutableStateFlow<List<City>>(emptyList())
-    val searchResults: StateFlow<List<City>> get() = _searchResults
+    override val searchResults: StateFlow<List<City>> get() = _searchResults
 
     private val _showFavouritesOnly = MutableStateFlow(false)
-    val showFavouritesOnly: StateFlow<Boolean> get() = _showFavouritesOnly
+    override val showFavouritesOnly: StateFlow<Boolean> get() = _showFavouritesOnly
 
     private val _selectedCity = MutableStateFlow<City?>(null)
-    val selectedCity: StateFlow<City?> = _selectedCity
+    override val selectedCity: StateFlow<City?> = _selectedCity
 
 
     init {
@@ -53,7 +53,7 @@ class CitiesViewModel(
         }
     }
 
-    fun fetchCities() {
+    override fun fetchCities() {
         viewModelScope.launch {
             val flow = if (showFavouritesOnly.value) {
                 getFavouriteCitiesUseCase()
@@ -66,7 +66,7 @@ class CitiesViewModel(
         }
     }
 
-    fun updateSearchQuery(query: String) {
+    override fun updateSearchQuery(query: String) {
         _searchQuery.value = query
         performSearch()
     }
@@ -100,13 +100,13 @@ class CitiesViewModel(
         return allCities.find { it.id == cityId }
     }
 
-    fun toggleShowFavourites() {
+    override fun toggleShowFavourites() {
         _showFavouritesOnly.value = !_showFavouritesOnly.value
         fetchCities()
         performSearch()
     }
 
-    fun toggleFavourite(cityId: Int) {
+    override fun toggleFavourite(cityId: Int) {
         viewModelScope.launch {
             toggleFavouriteUseCase(cityId)
             fetchCities()
@@ -114,7 +114,7 @@ class CitiesViewModel(
         }
     }
 
-    fun selectCity(cityId: Int) {
+    override fun selectCity(cityId: Int) {
         _selectedCity.value = getCityById(cityId)
     }
 }

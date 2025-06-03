@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.amolina.domain.model.City
 import com.amolina.presentation.R
@@ -56,7 +57,7 @@ fun GoogleMapScreen(
 
         GoogleMap(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize().testTag("GoogleMap"),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(
                 isMyLocationEnabled = true,

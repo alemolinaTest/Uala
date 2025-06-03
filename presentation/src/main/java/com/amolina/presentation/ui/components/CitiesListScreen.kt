@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -32,14 +33,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.amolina.domain.model.City
 import com.amolina.domain.util.Resource
 import com.amolina.presentation.R
-import com.amolina.presentation.ui.viewmodel.CitiesViewModel
+import com.amolina.presentation.ui.viewmodel.ICitiesViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitiesListScreen(
-    viewModel: CitiesViewModel,
+    viewModel: ICitiesViewModel,
     usePaging: Boolean = false,
     onCityClicked: (Int) -> Unit,
     onInfoClicked: (Int) -> Unit,
@@ -206,9 +207,12 @@ internal fun LoaderItem() {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            modifier = Modifier.testTag("CircularProgressIndicator")
+        )
     }
 }
+
 
 @Composable
 internal fun ErrorItem(message: String) {
