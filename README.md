@@ -52,3 +52,9 @@ This module implements the core functionality for managing and displaying a list
 -The first time the google map is being shown. The map is not rendering right.
 -The second time the map will be rendered right.
 -I was not able to solve that glitch
+
+## Map Api Key needed
+
+-create a secrets.properties on project root and ad this line 
+GOOGLE_MAPS_API_KEY=AIzaSyAevfbZ03_PobVAgqNnV1111111-J0
+with your api key on it.
