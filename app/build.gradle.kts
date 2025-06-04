@@ -17,7 +17,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         // Load secrets.properties explicitly
         val secretsFile = rootProject.file("secrets.properties")
