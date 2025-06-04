@@ -3,8 +3,11 @@ package com.amolina.presentation.ui.components
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.amolina.domain.model.City
 import com.amolina.domain.model.CoordDto
@@ -19,11 +22,13 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import com.amolina.presentation.R
+
 
 class CitiesListScreenTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createComposeRule()
 
     private val dummyCity = City(
         id = 1,
@@ -40,7 +45,6 @@ class CitiesListScreenTest {
         composeTestRule.setContent {
             CitiesListScreen(
                 viewModel = viewModel,
-                usePaging = false,
                 onCityClicked = {},
                 onInfoClicked = {}
             )
@@ -59,7 +63,6 @@ class CitiesListScreenTest {
         composeTestRule.setContent {
             CitiesListScreen(
                 viewModel = viewModel,
-                usePaging = false,
                 onCityClicked = {},
                 onInfoClicked = {}
             )
@@ -71,18 +74,22 @@ class CitiesListScreenTest {
 
     @Test
     fun citiesListScreen_displaysError_whenError() {
-        val viewModel = createFakeViewModel(
-            citiesState = MutableStateFlow(Resource.Error(Exception("Network Error"), "Network Error"))
-        )
+        val viewModel = createFakeViewModel()
+        val errorPagingFlow = Pager(
+            config = PagingConfig(pageSize = 20)
+        ) { ErrorPagingSource() }.flow
+
+        whenever(viewModel.pagedCities).thenReturn(errorPagingFlow)
 
         composeTestRule.setContent {
             CitiesListScreen(
                 viewModel = viewModel,
-                usePaging = false,
                 onCityClicked = {},
                 onInfoClicked = {}
             )
         }
+
+        composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithText("Error: Network Error")
             .assertIsDisplayed()
@@ -98,11 +105,12 @@ class CitiesListScreenTest {
         composeTestRule.setContent {
             CitiesListScreen(
                 viewModel = viewModel,
-                usePaging = false,
                 onCityClicked = {},
                 onInfoClicked = {}
             )
         }
+        composeTestRule.waitForIdle() // ensures Compose hierarchy is ready
+
 
         composeTestRule.onNodeWithText("${dummyCity.name}, ${dummyCity.countryCode}")
             .assertIsDisplayed()
@@ -121,14 +129,12 @@ class CitiesListScreenTest {
         // Return the passed-in MutableStateFlows
         whenever(viewModel.showFavouritesOnly).thenReturn(showFavouritesOnly)
         whenever(viewModel.selectedCity).thenReturn(selectedCity)
-        whenever(viewModel.citiesState).thenReturn(citiesState)
-        whenever(viewModel.searchResults).thenReturn(searchResults)
         whenever(viewModel.searchQuery).thenReturn(searchQuery)
-        whenever(viewModel.pagedCities).thenReturn(flowOf(PagingData.empty()))
+        whenever(viewModel.pagedCities).thenReturn(flowOf(PagingData.from(listOf(dummyCity))))
+
 
         // Do-nothing methods
         doNothing().whenever(viewModel).updateSearchQuery(anyString())
-        doNothing().whenever(viewModel).fetchCities()
         doNothing().whenever(viewModel).toggleShowFavourites()
         doNothing().whenever(viewModel).toggleFavourite(anyInt())
 

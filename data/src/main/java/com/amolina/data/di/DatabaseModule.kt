@@ -26,8 +26,6 @@ val databaseModule = module {
     single<CitiesRepository> {
         CitiesRepositoryImpl(
             dao = get(),
-            api = get(),
-            ioDispatcher = get()
-        )
+            api = get(),)
     }
 }

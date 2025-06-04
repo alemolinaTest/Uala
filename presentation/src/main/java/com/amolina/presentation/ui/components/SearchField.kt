@@ -52,7 +52,7 @@ fun FilterRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Show Favourites Only")
+        Text(stringResource(R.string.show_favourites_only))
         Switch(checked = isFavourites, onCheckedChange = { onToggleFavourites() })
     }
 }

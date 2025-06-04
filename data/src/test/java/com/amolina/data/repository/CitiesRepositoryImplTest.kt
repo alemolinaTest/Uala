@@ -4,125 +4,108 @@ import com.amolina.data.local.CitiesDao
 import com.amolina.data.local.CityEntity
 import com.amolina.data.local.toDomain
 import com.amolina.data.remote.CitiesApiService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import com.amolina.domain.model.City
+import com.amolina.domain.model.CoordDto
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import org.mockito.MockitoAnnotations
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 
-@ExperimentalCoroutinesApi
+@ExtendWith(MockitoExtension::class)
 class CitiesRepositoryImplTest {
 
     @Mock
-    private lateinit var dao: CitiesDao
+    lateinit var citiesDao: CitiesDao
 
     @Mock
-    private lateinit var apiService: CitiesApiService
+    lateinit var citiesApi: CitiesApiService
 
     private lateinit var repository: CitiesRepositoryImpl
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
     @BeforeEach
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        repository = CitiesRepositoryImpl(dao, apiService, testDispatcher)
+        repository = CitiesRepositoryImpl(citiesDao, citiesApi)
     }
 
     @Test
-    fun `searchCities with favouritesOnly false calls dao searchCities`() = runTest {
-        val prefix = "Lon"
-        val dummyEntities = listOf(
-            CityEntity(
+    fun `toggleFavourite should toggle favourite when city exists`() = runTest {
+        val cityId = 1
+        val cityEntity = CityEntity(
+            id = cityId, name = "TestCity", countryCode = "US",
+            latitude = 0.0, longitude = 0.0, isFavourite = false
+        )
+        whenever(citiesDao.getCityById(cityId)).thenReturn(cityEntity)
+
+        repository.toggleFavourite(cityId)
+
+        verify(citiesDao).updateFavourite(cityId, true)
+    }
+
+    @Test
+    fun `toggleFavourite should do nothing when city does not exist`() = runTest {
+        val cityId = 99
+        whenever(citiesDao.getCityById(cityId)).thenReturn(null)
+
+        repository.toggleFavourite(cityId)
+
+        verify(citiesDao, never()).updateFavourite(any(), any())
+    }
+
+    @Test
+    fun `refreshCities should fetch from API and insert cities`() = runTest {
+        val remoteCities = listOf(
+            City(
                 id = 1,
-                name = "London",
+                name = "City1",
                 countryCode = "US",
-                latitude = 0.0,
-                longitude = 0.0,
+                CoordDto(latitude = 0.0, longitude = 0.0),
+                isFavourite = false
+            ),
+            City(
+                id = 2,
+                name = "City2",
+                countryCode = "US",
+                CoordDto(latitude = 0.0, longitude = 0.0),
                 isFavourite = false
             )
         )
-        val expectedDomain = dummyEntities.map { it.toDomain() }
+        val localFavourites = listOf(1)
 
-        `when`(dao.searchCities(prefix)).thenReturn(dummyEntities)
+        whenever(citiesApi.fetchCities()).thenReturn(remoteCities)
+        whenever(citiesDao.getFavouriteCityIds()).thenReturn(localFavourites)
 
-        val result = repository.searchCities(prefix, favouritesOnly = false)
+        repository.refreshCities()
 
-        verify(dao, times(1)).searchCities(prefix)
-        verify(dao, never()).searchFavouriteCities(anyString())
-        assertEquals(expectedDomain, result)
+        verify(citiesDao).insertAll(any())
     }
 
     @Test
-    fun `searchCities with favouritesOnly true calls dao searchFavouriteCities`() = runTest {
-        val prefix = "Par"
-        val dummyEntities = listOf(
-            CityEntity(
-                id = 2,
-                name = "Paris",
-                countryCode = "FR",
-                latitude = 0.0,
-                longitude = 0.0,
-                isFavourite = true
-            )
+    fun `getCityById returns City when city exists`() = runTest {
+        val cityId = 1
+        val cityEntity = CityEntity(
+            id = cityId, name = "TestCity", countryCode = "US",
+            latitude = 0.0, longitude = 0.0, isFavourite = false
         )
-        val expectedDomain = dummyEntities.map { it.toDomain() }
+        whenever(citiesDao.getCityById(cityId)).thenReturn(cityEntity)
 
-        `when`(dao.searchFavouriteCities(prefix)).thenReturn(dummyEntities)
+        val result = repository.getCityById(cityId)
 
-        val result = repository.searchCities(prefix, favouritesOnly = true)
-
-        verify(dao, times(1)).searchFavouriteCities(prefix)
-        verify(dao, never()).searchCities(anyString())
-        assertEquals(expectedDomain, result)
+        assertEquals(cityEntity.toDomain(), result)
     }
 
     @Test
-    fun `searchCities returns empty list for no matches`() = runTest {
-        val prefix = "NonExistentCity"
-        `when`(dao.searchCities(prefix)).thenReturn(emptyList())
+    fun `getCityById returns null when city does not exist`() = runTest {
+        val cityId = 99
+        whenever(citiesDao.getCityById(cityId)).thenReturn(null)
 
-        val result = repository.searchCities(prefix, favouritesOnly = false)
+        val result = repository.getCityById(cityId)
 
-        assertTrue(result.isEmpty())
-    }
-
-    @Test
-    fun `searchCities returns correctly mapped domain objects`() = runTest {
-        val prefix = "Test"
-        val dummyEntities = listOf(
-            CityEntity(
-                id = 1,
-                name = "California",
-                countryCode = "US",
-                latitude = 0.0,
-                longitude = 0.0,
-                isFavourite = true
-            )
-        )
-
-        val expectedDomain = dummyEntities.map { it.toDomain() }
-
-        `when`(dao.searchCities(prefix)).thenReturn(dummyEntities)
-
-        val result = repository.searchCities(prefix, favouritesOnly = false)
-
-        assertEquals(expectedDomain, result)
-    }
-
-    @Test
-    fun `searchCities handles special characters in prefix`() = runTest {
-        val prefix = "%@$#"
-        `when`(dao.searchCities(prefix)).thenReturn(emptyList())
-
-        val result = repository.searchCities(prefix, favouritesOnly = false)
-
-        assertTrue(result.isEmpty())
-        verify(dao, times(1)).searchCities(prefix)
+        assertEquals(null, result)
     }
 }

@@ -13,4 +13,13 @@
     <string name="back">Back</string>
     <string name="welcome_to_in">Welcome to %1$s in %2$s!</string>
     <string name="no_cities_available">No cities available</string>
+    <string name="marked_as_favourite">Marked as Favourite</string>
+    <string name="not_favourite">Not Favourite</string>
+    <string name="city">City: %1$s</string>
+    <string name="country_code">Country Code: %1$s</string>
+    <string name="coordinates">Coordinates:</string>
+    <string name="latitude">Latitude: %1$s</string>
+    <string name="longitude">Longitude: %1$s</string>
+    <string name="city_info">City Info</string>
+    <string name="show_favourites_only">Show Favourites Only</string>
 </resources>

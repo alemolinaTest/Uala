@@ -18,11 +18,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.amolina.presentation.R
 import com.amolina.presentation.ui.components.FilterRow
-import com.amolina.presentation.ui.components.NonPagedCitiesList
 import com.amolina.presentation.ui.components.PagedCitiesList
 import com.amolina.presentation.ui.components.SearchField
 import com.amolina.presentation.ui.viewmodel.ICitiesViewModel
@@ -31,13 +28,11 @@ import com.amolina.presentation.ui.viewmodel.ICitiesViewModel
 @Composable
 fun LandscapeCitiesMapScreen(
     viewModel: ICitiesViewModel,
-    usePaging: Boolean = false,
     onInfoClicked: (Int) -> Unit,
 ) {
     val isFavourites by viewModel.showFavouritesOnly.collectAsState()
     val selectedCity by viewModel.selectedCity.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
-
 
     Row(modifier = Modifier.fillMaxSize()) {
         // Left side: City List
@@ -51,10 +46,7 @@ fun LandscapeCitiesMapScreen(
             SearchField(
                 query = searchQuery,
                 onQueryChanged = { viewModel.updateSearchQuery(it) },
-                onClearQuery = {
-                    viewModel.updateSearchQuery("")
-                    viewModel.fetchCities()
-                }
+                onClearQuery = { viewModel.updateSearchQuery("") }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -66,25 +58,13 @@ fun LandscapeCitiesMapScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (usePaging) {
-                PagedCitiesList(
-                    pagedCities = viewModel.pagedCities,
-                    selectedCityId = selectedCity?.id,
-                    onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = { viewModel.selectCity(it) },
-                    onInfoClicked = { onInfoClicked(it) }
-
-                )
-            } else {
-                NonPagedCitiesList(
-                    citiesState = viewModel.citiesState,
-                    searchResults = viewModel.searchResults,
-                    selectedCityId = selectedCity?.id,
-                    onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = { viewModel.selectCity(it) },
-                    onInfoClicked = { onInfoClicked(it) }
-                )
-            }
+            PagedCitiesList(
+                pagedCities = viewModel.pagedCities,
+                selectedCityId = selectedCity?.id,
+                onToggleFavourite = { viewModel.toggleFavourite(it) },
+                onCityClicked = { viewModel.selectCity(it) },
+                onInfoClicked = { onInfoClicked(it) }
+            )
         }
 
         // Right side: Map View
@@ -95,8 +75,9 @@ fun LandscapeCitiesMapScreen(
         ) {
             selectedCity?.let { city ->
                 Box(
-                    modifier = Modifier.fillMaxSize().testTag("GoogleMapContainer")
-                    ,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("GoogleMapContainer"),
                     contentAlignment = Alignment.Center
                 ) {
                     GoogleMapScreen(cities = listOf(city))
@@ -105,10 +86,9 @@ fun LandscapeCitiesMapScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    stringResource(R.string.select_a_city_from_the_list),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+
+                Text("Select a city from the list", style = MaterialTheme.typography.bodyLarge)
+
             }
         }
     }

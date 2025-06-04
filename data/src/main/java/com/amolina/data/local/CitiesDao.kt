@@ -8,11 +8,11 @@ import androidx.room.Query
 
 @Dao
 interface CitiesDao {
-    @Query("SELECT * FROM cities")
-    suspend fun getAllCities(): List<CityEntity>
+    @Query("SELECT * FROM cities ORDER BY name ASC")
+    fun getAllCitiesPaged(): PagingSource<Int, CityEntity>
 
-    @Query("SELECT * FROM cities WHERE isFavourite = 1")
-    suspend fun getFavouriteCities(): List<CityEntity>
+    @Query("SELECT * FROM cities WHERE isFavourite = 1 ORDER BY name ASC")
+    fun getFavouriteCitiesPaged(): PagingSource<Int, CityEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(cities: List<CityEntity>)
@@ -23,21 +23,22 @@ interface CitiesDao {
     @Query("UPDATE cities SET isFavourite = :isFavourite WHERE id = :cityId")
     suspend fun updateFavourite(cityId: Int, isFavourite: Boolean)
 
-    @Query("SELECT * FROM cities ORDER BY name ASC")
-    fun getAllCitiesPaged(): PagingSource<Int, CityEntity>
-
     @Query("""
         SELECT * FROM cities
         WHERE name LIKE :prefix || '%' COLLATE NOCASE
         ORDER BY name ASC, countryCode ASC
     """)
-    suspend fun searchCities(prefix: String): List<CityEntity>
+    fun searchCitiesPaged(prefix: String): PagingSource<Int, CityEntity>
 
     @Query("""
         SELECT * FROM cities
         WHERE name LIKE :prefix || '%' COLLATE NOCASE AND isFavourite = 1
         ORDER BY name ASC, countryCode ASC
     """)
-    suspend fun searchFavouriteCities(prefix: String): List<CityEntity>
+    fun searchFavouriteCitiesPaged(prefix: String): PagingSource<Int, CityEntity>
+
+    @Query("SELECT id FROM cities WHERE isFavourite = 1")
+    suspend fun getFavouriteCityIds(): List<Int>
 
 }
+

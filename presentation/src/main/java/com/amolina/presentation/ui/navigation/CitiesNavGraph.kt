@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -36,7 +37,6 @@ fun CitiesNavGraph(navController: NavHostController) {
             } else {
                 CitiesListScreen(
                     viewModel = viewModel,
-                    usePaging = false,
                     onCityClicked = { cityId ->
                         navController.navigate(Screen.Map.createRoute(cityId))
                     },
@@ -59,8 +59,9 @@ fun CitiesNavGraph(navController: NavHostController) {
                 val cityIdString = backStackEntry.arguments?.getString("cityId")
                 val cityId = cityIdString?.toIntOrNull()
                 cityId?.let {
-                    val city = viewModel.getCityById(it)
-                    city?.let {
+                    viewModel.selectCity(it)
+                    val selectedCity = viewModel.selectedCity.collectAsState().value
+                    selectedCity?.let {
                         MapScreen(
                             city = it,
                             onBackPressed = { navController.navigateUp() }
@@ -77,8 +78,9 @@ fun CitiesNavGraph(navController: NavHostController) {
             val cityIdString = backStackEntry.arguments?.getString("cityId")
             val cityId = cityIdString?.toIntOrNull()
             cityId?.let {
-                val city = viewModel.getCityById(it)
-                city?.let {
+                viewModel.selectCity(it)
+                val selectedCity = viewModel.selectedCity.collectAsState().value
+                selectedCity?.let {
                     CityDetailScreen(
                         city = it,
                         onToggleFavourite = { cityId -> viewModel.toggleFavourite(cityId) },

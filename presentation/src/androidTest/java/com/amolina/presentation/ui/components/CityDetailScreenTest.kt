@@ -32,6 +32,7 @@ class CityDetailScreenTest {
                 onBackPressed = {}
             )
         }
+        composeTestRule.waitForIdle() // ensures Compose hierarchy is ready
 
         composeTestRule.onNodeWithText("${dummyCity.name}, ${dummyCity.countryCode}")
             .assertIsDisplayed()
@@ -56,6 +57,7 @@ class CityDetailScreenTest {
                 onBackPressed = { backPressed = true }
             )
         }
+        composeTestRule.waitForIdle() // ensures Compose hierarchy is ready
 
         composeTestRule.onNodeWithContentDescription("Back")
             .performClick()
@@ -74,6 +76,7 @@ class CityDetailScreenTest {
                 onBackPressed = {}
             )
         }
+        composeTestRule.waitForIdle() // ensures Compose hierarchy is ready
 
         composeTestRule.onNodeWithContentDescription("Unfavourite")
             .performClick()
@@ -90,6 +93,8 @@ class CityDetailScreenTest {
                 onBackPressed = {}
             )
         }
+        composeTestRule.waitForIdle() // ensures Compose hierarchy is ready
+
 
         composeTestRule.onNodeWithContentDescription("Unfavourite")
             .assertExists()
@@ -104,6 +109,7 @@ class CityDetailScreenTest {
                 onBackPressed = {}
             )
         }
+        composeTestRule.waitForIdle() // ensures Compose hierarchy is ready
 
         composeTestRule.onNodeWithContentDescription("Favourite")
             .assertExists()

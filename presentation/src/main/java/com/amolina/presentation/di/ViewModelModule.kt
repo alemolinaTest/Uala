@@ -7,11 +7,12 @@ val viewModelModule = module {
 
     factory {
         CitiesViewModel(
-            getCitiesUseCase = get(),
             toggleFavouriteUseCase = get(),
             getFavouriteCitiesUseCase = get(),
             getCitiesPagedUseCase = get(),
             searchCitiesUseCase = get(),
+            getCityByIdUseCase = get(),
+            getRemoteCitiesUseCase = get()
         )
     }
 

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,22 +30,20 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.amolina.domain.model.City
-import com.amolina.domain.util.Resource
 import com.amolina.presentation.R
 import com.amolina.presentation.ui.viewmodel.ICitiesViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitiesListScreen(
     viewModel: ICitiesViewModel,
-    usePaging: Boolean = false,
     onCityClicked: (Int) -> Unit,
     onInfoClicked: (Int) -> Unit,
 ) {
     val isFavourites by viewModel.showFavouritesOnly.collectAsState()
     val selectedCityId by viewModel.selectedCity.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     Scaffold(
         topBar = {
@@ -54,7 +51,7 @@ fun CitiesListScreen(
                 title = {
                     Text(
                         stringResource(R.string.cities_app),
-                        color = MaterialTheme.colorScheme.onPrimary // Text color on header
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 },
                 navigationIcon = {
@@ -77,12 +74,9 @@ fun CitiesListScreen(
                 .padding(16.dp)
         ) {
             SearchField(
-                query = viewModel.searchQuery.collectAsState().value,
+                query = searchQuery,
                 onQueryChanged = { viewModel.updateSearchQuery(it) },
-                onClearQuery = {
-                    viewModel.updateSearchQuery("")
-                    viewModel.fetchCities()
-                }
+                onClearQuery = { viewModel.updateSearchQuery("") }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -94,59 +88,14 @@ fun CitiesListScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (usePaging) {
-                PagedCitiesList(
-                    pagedCities = viewModel.pagedCities,
-                    selectedCityId = selectedCityId?.id,
-                    onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = onCityClicked,
-                    onInfoClicked = { onInfoClicked(it) }
-                )
-            } else {
-                NonPagedCitiesList(
-                    citiesState = viewModel.citiesState,
-                    searchResults = viewModel.searchResults,
-                    selectedCityId = selectedCityId?.id,
-                    onToggleFavourite = { viewModel.toggleFavourite(it) },
-                    onCityClicked = onCityClicked,
-                    onInfoClicked = { onInfoClicked(it) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-internal fun NonPagedCitiesList(
-    citiesState: StateFlow<Resource<List<City>>>,
-    searchResults: StateFlow<List<City>>,
-    selectedCityId: Int?,
-    onToggleFavourite: (Int) -> Unit,
-    onCityClicked: (Int) -> Unit,
-    onInfoClicked: (Int) -> Unit,
-) {
-    val state by citiesState.collectAsState()
-    val results by searchResults.collectAsState()
-
-    when (state) {
-        is Resource.Loading -> LoaderItem()
-        is Resource.Success -> {
-            LazyColumn {
-                items(results) { city ->
-                    CityListItem(
-                        city = city,
-                        onToggleFavourite = { onToggleFavourite(city.id) },
-                        onCityClicked = { onCityClicked(city.id) },
-                        isSelected = city.id == selectedCityId,
-                        onInfoClicked = { onInfoClicked(city.id) }
-                    )
-                }
-            }
-        }
-
-        is Resource.Error -> {
-            val error = (state as Resource.Error).message ?: stringResource(R.string.unknown_error)
-            ErrorItem(error)
+            // Always use PagedCitiesList now
+            PagedCitiesList(
+                pagedCities = viewModel.pagedCities,
+                selectedCityId = selectedCityId?.id,
+                onToggleFavourite = { viewModel.toggleFavourite(it) },
+                onCityClicked = onCityClicked,
+                onInfoClicked = onInfoClicked
+            )
         }
     }
 }
@@ -187,12 +136,12 @@ internal fun PagedCitiesList(
 
                 loadState.refresh is LoadState.Error -> {
                     val e = loadState.refresh as LoadState.Error
-                    item { ErrorItem(e.error.message ?: stringResource(R.string.unknown_error)) }
+                    item { ErrorItem(e.error.message ?: "Unknown error") }
                 }
 
                 loadState.append is LoadState.Error -> {
                     val e = loadState.append as LoadState.Error
-                    item { ErrorItem(e.error.message ?: stringResource(R.string.unknown_error)) }
+                    item { ErrorItem(e.error.message ?: "Unknown error") }
                 }
             }
         }
@@ -213,7 +162,6 @@ internal fun LoaderItem() {
     }
 }
 
-
 @Composable
 internal fun ErrorItem(message: String) {
     Box(
@@ -223,7 +171,7 @@ internal fun ErrorItem(message: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(R.string.error, message),
+            text = "Error: $message",
             color = MaterialTheme.colorScheme.error
         )
     }

@@ -64,5 +64,6 @@ dependencies {
     testImplementation(libs.paging.common)
     testImplementation(libs.arch.core.testing)
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.paging.testing)
 
 }

@@ -66,7 +66,7 @@ fun CityListItem(
                     IconButton(onClick = onInfoClicked) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = "City Info",
+                            contentDescription = stringResource(R.string.city_info),
                         )
                     }
                     IconButton(onClick = onToggleFavourite) {
