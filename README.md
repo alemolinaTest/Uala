@@ -21,7 +21,7 @@ This module implements the core functionality for managing and displaying a list
 - **Database Search with PagingSource**:  
   Search queries are executed directly in the database layer using Room DAO methods that return a **PagingSource** (e.g., `searchCitiesPaged(prefix)` and `searchFavouriteCitiesPaged(prefix)`).
 - **Why?**  
-  Leverages SQLite’s built-in query capabilities (`LIKE`, `COLLATE NOCASE`) for efficient, indexed filtering, while also integrating seamlessly with the Paging 3 library.
+  Leverages SQLite’s built-in query capabilities for efficient, indexed filtering, while also integrating seamlessly with the Paging 3 library.
 - **Benefit**:  
   Supports infinite scrolling and memory-efficient loading, ensuring smooth performance even with large datasets.
 
